@@ -1,0 +1,110 @@
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+public class Main extends Application {
+
+    @Override
+    public void start(Stage primaryStage) {
+        // Create the user interface
+        VBox root = new VBox(10);
+        root.setPadding(new Insets(10));
+
+        // Create a text field for the user to enter the number of employees
+        TextField numEmployeesField = new TextField();
+        numEmployeesField.setPromptText("Number of employees");
+
+        // Create a button to calculate the totals
+        Button calculateButton = new Button("Calculate");
+        calculateButton.setOnAction(e -> {
+            // Calculate the totals here
+            try {
+                int numEmployees = Integer.parseInt(numEmployeesField.getText());
+                double totalWeeklyWage = calculateTotalWeeklyWage(numEmployees);
+                double totalDaysWorked = calculateTotalDaysWorked(numEmployees);
+                double totalPay = calculateTotalPay(numEmployees);
+
+                // Display the results in a table
+                TableView tableView = new TableView();
+                TableColumn< EmployeeStats, Double> weeklyWageColumn = new TableColumn<>("Weekly Wage");
+                weeklyWageColumn.setCellValueFactory(new PropertyValueFactory<>("weeklyWage"));
+                TableColumn< EmployeeStats, Double> daysWorkedColumn = new TableColumn<>("Days Worked");
+                daysWorkedColumn.setCellValueFactory(new PropertyValueFactory<>("daysWorked"));
+                TableColumn< EmployeeStats, Double> payColumn = new TableColumn<>("Pay");
+                payColumn.setCellValueFactory(new PropertyValueFactory<>("pay"));
+                tableView.getColumns().addAll(weeklyWageColumn, daysWorkedColumn, payColumn);
+                tableView.getItems().add(new EmployeeStats(totalWeeklyWage, totalDaysWorked, totalPay));
+                root.getChildren().add(tableView);
+            } catch (NumberFormatException ex) {
+                System.out.println("Error: invalid number of employees");
+            }
+        });
+
+        // Add the controls to the user interface
+        root.getChildren().addAll(
+                new Label("Number of employees:"),
+                numEmployeesField,
+                calculateButton
+        );
+
+        // Create the scene and the stage
+        Scene scene = new Scene(root, 300, 250);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Monitoramento Semanal - Versão 1.0");
+        primaryStage.show();
+    }
+
+    // Methods to calculate the totals
+    private double calculateTotalWeeklyWage(int numEmployees) {
+        double basic = 25000; // assume basic salary is 25000
+        double hra = 0.10 * basic; // 10% of basic
+        double da = 0.08 * basic; // 8% of basic
+        double grossSalary = basic + hra + da;
+        double tax = 0.05 * grossSalary; // 5% tax on gross salary
+        double netSalary = grossSalary - tax;
+        return netSalary * numEmployees / 4; // assume 4 weeks in a month
+    }
+
+    private double calculateTotalDaysWorked(int numEmployees) {
+        return numEmployees * 20; // assume 20 days worked per employee
+    }
+
+    private double calculateTotalPay(int numEmployees) {
+        return calculateTotalWeeklyWage(numEmployees) * 4; // assume 4 weeks in a month
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    private static class EmployeeStats {
+        private double weeklyWage;
+        private double daysWorked;
+        private double pay;
+
+        public EmployeeStats(double weeklyWage, double daysWorked, double pay) {
+            this.weeklyWage = weeklyWage;
+            this.daysWorked = daysWorked;
+            this.pay = pay;
+        }
+
+        public double getWeeklyWage() {
+            return weeklyWage;
+        }
+
+        public double getDaysWorked() {
+            return daysWorked;
+        }
+
+        public double getPay() {
+            return pay;
+        }
+    }
+}
